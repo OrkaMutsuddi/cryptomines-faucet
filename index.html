@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cryptomines Faucet</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <style>
+    body { font-family: sans-serif; text-align: center; margin-top: 100px; }
+    button { font-size: 18px; padding: 10px 20px; cursor: pointer; }
+  </style>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Cryptomines Faucet</h1>
+  <p>Click below to claim free test CM tokens!</p>
+  <button id="claimBtn">Claim 100 CM</button>
+  <p id="status"></p>
+
+<h4>Made with 💖 by Himaddri</h4>
+<h4>Github link <a href="https://github.com/himaddrimutsuddi">https://github.com/himaddrimutsuddi</a></h4>
+
+  <script>
+    const contractAddress = "0x18F869b614aB18fe99f643179437f30cD1D69B84";
+    const abi = [
+      "function faucet(address to, uint256 amount) public",
+    ];
+
+    async function claimTokens() {
+      if (typeof window.ethereum === 'undefined') {
+        alert("MetaMask is required.");
+        return;
+      }
+
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      const signer = provider.getSigner();
+      const userAddress = await signer.getAddress();
+      const contract = new ethers.Contract(contractAddress, abi, signer);
+
+      try {
+        const tx = await contract.faucet(userAddress, ethers.utils.parseUnits("100", 18));
+        document.getElementById("status").innerText = "Transaction sent: " + tx.hash;
+        await tx.wait();
+        document.getElementById("status").innerText = "✅ 100 CM tokens claimed!";
+      } catch (err) {
+        document.getElementById("status").innerText = "❌ Error: " + err.message;
+      }
+    }
+
+    document.getElementById("claimBtn").addEventListener("click", claimTokens);
+  </script>
+</body>
+</html>
